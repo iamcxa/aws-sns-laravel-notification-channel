@@ -2,7 +2,7 @@
 
 namespace NotificationChannels\AwsSns;
 
-use Aws\Sns\SnsClient;
+use Aws\Sns\SnsClient as SnsService;
 use Illuminate\Support\ServiceProvider;
 
 class SNSServiceProvider extends ServiceProvider
@@ -15,9 +15,13 @@ class SNSServiceProvider extends ServiceProvider
         $this->app->when(SNSChannel::class)
             ->needs(SNSClient::class)
             ->give(function () {
-                return $this->app->make('aws')->createClient('sns');
+                return new Sns($this->app->make(SnsService::class));
             }
         );
+        
+        $this->app->bind(SnsService::class, function () {
+            return new SnsService($this->app['config']['services.sns']);
+        });
     }
 
     /**
